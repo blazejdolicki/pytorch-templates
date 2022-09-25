@@ -17,11 +17,16 @@ class WineDataset(Dataset):
     def __getitem__(self, index):
         return self.inputs[index], self.labels[index]
 
+    def __len__(self):
+        return len(self.labels)
+
 
 if __name__ == "__main__":
     from wine_dataset import WineDataset
 
-    data_path = "D:\Blazej\Dokumenty\data\winequality-white.csv"
+    data_path = "D:/Blazej/Dokumenty/data/train_wine.csv"
     dataset = WineDataset(data_path)
 
+    print("Dataset size", len(dataset))
+    print("First element")
     print(dataset[0])
