@@ -4,6 +4,9 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import os
+import random
+import numpy as np
 
 from net import Net
 
@@ -14,7 +17,24 @@ data_dir = "D:\Blazej\Dokumenty\data"
 num_classes = 10
 learning_rate = 0.001
 momentum = 0.9
-num_epochs = 4
+num_epochs = 1
+checkpoint_dir = "checkpoints"
+seed = 7
+
+os.makedirs(checkpoint_dir, exist_ok=True)
+
+# fix seed
+def fix_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+
+fix_seed(seed)
+
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -76,7 +96,7 @@ for epoch in tqdm(range(num_epochs)):
     with torch.no_grad():
         for inputs, labels in tqdm(val_loader):
             inputs = inputs.to(device)
-            labels = labels.to(device)
+            labels = labels.to(device)  
 
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -98,6 +118,9 @@ for epoch in tqdm(range(num_epochs)):
 
     print(f"Epoch: {epoch},  train loss: {epoch_loss}, train accuracy: {epoch_acc}, val loss: {val_epoch_loss}, val accuracy {val_epoch_acc}")
 
+    # save model
+    model_path = os.path.join(checkpoint_dir, f"checkpoint_epoch{epoch}.pt")
+    torch.save(model.state_dict(), model_path)
 
 
 
