@@ -9,15 +9,16 @@ import random
 import numpy as np
 
 from net import Net
+from patch_dataset import PatchDataset
 
 
 # arguments
 batch_size = 16
-data_dir = "D:\Blazej\Dokumenty\data"
+data_dir = "C:/Users/BlazejDolicki/Documents/Personal/Git/pytorch-templates/vision/data"
 num_classes = 10
 learning_rate = 0.001
 momentum = 0.9
-num_epochs = 1
+num_epochs = 2
 checkpoint_dir = "checkpoints"
 seed = 7
 
@@ -42,15 +43,16 @@ transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5,),
                                                      (0.5, 0.5, 0.5))])
 
-train_dataset = torchvision.datasets.CIFAR10(root=data_dir, train=True, download=True, transform=transform)
-val_dataset = torchvision.datasets.CIFAR10(root=data_dir, train=False, download=True, transform=transform)
+
+train_dataset = PatchDataset(data_dir=data_dir, split="train", transform=transform)
+val_dataset = PatchDataset(data_dir=data_dir, split="valid", transform=transform)
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
 model = Net(num_classes=num_classes).to(device)
 
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 criterion = torch.nn.CrossEntropyLoss()
 
@@ -116,7 +118,9 @@ for epoch in tqdm(range(num_epochs)):
     val_epoch_loss = val_running_loss / len(val_dataset)
     val_epoch_acc = 100 * val_num_correct / len(val_dataset)
 
-    print(f"Epoch: {epoch},  train loss: {epoch_loss}, train accuracy: {epoch_acc}, val loss: {val_epoch_loss}, val accuracy {val_epoch_acc}")
+    print(f"Epoch: {epoch}")
+    print(f"train loss: {epoch_loss}, train accuracy: {epoch_acc}")
+    print(f"val loss: {val_epoch_loss}, val accuracy {val_epoch_acc}")
 
     # save model
     model_path = os.path.join(checkpoint_dir, f"checkpoint_epoch{epoch}.pt")
